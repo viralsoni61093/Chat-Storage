@@ -1,5 +1,7 @@
 package org.example.service;
 
+import org.example.dto.ChatSessionRequest;
+import org.example.mapper.ChatSessionMapper;
 import org.example.model.ChatSession;
 import org.example.repository.ChatSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +24,19 @@ public class ChatSessionService {
     @Autowired
     private ChatSessionRepository chatSessionRepository;
 
+    @Autowired
+    private ChatSessionMapper chatSessionMapper;
+
     /**
      * Creates a new chat session for a user.
-     * @param userId the user ID
-     * @param name the name of the session
+     * @param request the chat session request DTO
      * @return the created ChatSession
      */
-    public ChatSession createSession(String userId, String name) {
-        ChatSession session = ChatSession.builder()
-                .userId(userId)
-                .name(name)
-                .isFavorite(false)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
+    public ChatSession createSession(ChatSessionRequest request) {
+        ChatSession session = chatSessionMapper.toEntity(request);
+        session.setCreatedAt(Instant.now());
+        session.setUpdatedAt(Instant.now());
+        session.setIsFavorite(request.getFavorite() != null ? request.getFavorite() : false);
         return chatSessionRepository.save(session);
     }
 

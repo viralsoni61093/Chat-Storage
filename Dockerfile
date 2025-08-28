@@ -23,3 +23,4 @@ COPY --from=builder /app/target/Chat-Storage-1.0-SNAPSHOT.jar app.jar
 
 # JVM arguments
 ENTRYPOINT ["java", "-Duser.timezone=Asia/Kolkata", "-jar", "/app/app.jar"]
+

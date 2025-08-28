@@ -1,12 +1,17 @@
 package org.example.controller;
 
+import org.example.dto.ChatSessionRequest;
+import org.example.dto.ChatSessionResponse;
 import org.example.model.ChatSession;
 import org.example.service.ChatSessionService;
+import org.example.mapper.ChatSessionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing chat sessions.
@@ -21,26 +26,34 @@ public class ChatSessionController {
     @Autowired
     private ChatSessionService chatSessionService;
 
+    @Autowired
+    private ChatSessionMapper chatSessionMapper;
+
     /**
      * Creates a new chat session for a user.
-     * @param userId the user ID
-     * @param name the name of the session
-     * @return the created ChatSession
+     * @param request the chat session request body
+     * @return the created ChatSessionResponse
      */
     @PostMapping
-    public ResponseEntity<ChatSession> createSession(@RequestParam String userId, @RequestParam String name) {
-        return ResponseEntity.ok(chatSessionService.createSession(userId, name));
+    public ResponseEntity<ChatSessionResponse> createSession(@Valid @RequestBody ChatSessionRequest request) {
+        ChatSession savedSession = chatSessionService.createSession(request);
+        ChatSessionResponse response = chatSessionMapper.toDto(savedSession);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Retrieves chat sessions for a user, optionally filtered by favorite status.
      * @param userId the user ID
      * @param favorite optional filter for favorite sessions
-     * @return a list of ChatSession objects
+     * @return a list of ChatSessionResponse objects
      */
     @GetMapping
-    public ResponseEntity<List<ChatSession>> getSessions(@RequestParam String userId, @RequestParam(required = false) Boolean favorite) {
-        return ResponseEntity.ok(chatSessionService.getSessions(userId, favorite));
+    public ResponseEntity<List<ChatSessionResponse>> getSessions(@RequestParam String userId, @RequestParam(required = false) Boolean favorite) {
+        List<ChatSessionResponse> responses = chatSessionService.getSessions(userId, favorite)
+            .stream()
+            .map(chatSessionMapper::toDto)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     /**

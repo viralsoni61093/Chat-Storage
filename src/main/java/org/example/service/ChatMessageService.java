@@ -1,5 +1,7 @@
 package org.example.service;
 
+import org.example.dto.ChatMessageRequest;
+import org.example.mapper.ChatMessageMapper;
 import org.example.model.ChatMessage;
 import org.example.model.ChatSession;
 import org.example.repository.ChatMessageRepository;
@@ -23,23 +25,18 @@ public class ChatMessageService {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
+    @Autowired
+    private ChatMessageMapper chatMessageMapper;
+
     /**
      * Adds a new message to a chat session.
-     * @param session the chat session
-     * @param sender the sender of the message
-     * @param content the message content
-     * @param context optional context for the message
+     * @param request the chat message request DTO
      * @return the created ChatMessage
      */
     @Transactional
-    public ChatMessage addMessage(ChatSession session, String sender, String content, String context) {
-        ChatMessage message = ChatMessage.builder()
-                .session(session)
-                .sender(sender)
-                .content(content)
-                .context(context)
-                .createdAt(Instant.now())
-                .build();
+    public ChatMessage addMessage(ChatMessageRequest request) {
+        ChatMessage message = chatMessageMapper.toEntity(request);
+        message.setCreatedAt(Instant.now());
         return chatMessageRepository.save(message);
     }
 

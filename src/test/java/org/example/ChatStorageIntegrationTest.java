@@ -2,20 +2,20 @@ package org.example;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.example.dto.ChatMessageRequest;
+import org.example.dto.ChatSessionRequest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ public class ChatStorageIntegrationTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String API_KEY_HEADER = "X-API-KEY";
-    private static final String API_KEY_VALUE = "local-dev-api-key";
+    private static final String API_KEY_VALUE = "your-secure-api-key";
 
     private int getRateLimit() {
         String value = System.getProperty("rate.limit");
@@ -62,12 +62,11 @@ public class ChatStorageIntegrationTest {
     void createSessionAddMessageRetrieveMessage() throws Exception {
         String userId = UUID.randomUUID().toString();
         String sessionName = "TestSession";
-        MultiValueMap<String, String> sessionParams = new LinkedMultiValueMap<>();
-        sessionParams.add("userId", userId);
-        sessionParams.add("name", sessionName);
+        ChatSessionRequest sessionRequest = new ChatSessionRequest(null, userId, sessionName, false);
         String clientIp = getUniqueIp();
         MvcResult sessionResult = mockMvc.perform(MockMvcRequestBuilders.post("/sessions")
-                .params(sessionParams)
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(sessionRequest))
                 .header(API_KEY_HEADER, API_KEY_VALUE)
                 .header("X-Forwarded-For", clientIp))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -77,17 +76,19 @@ public class ChatStorageIntegrationTest {
         String sessionId = sessionNode.has("id") ? sessionNode.get("id").asText() : null;
         Assertions.assertNotNull(sessionId);
 
-        MultiValueMap<String, String> msgParams = new LinkedMultiValueMap<>();
-        msgParams.add("sender", "user");
-        msgParams.add("content", "Hello, world!");
+        ChatMessageRequest msgRequest = new ChatMessageRequest(null, null, "user", "Hello, world!", null, null);
         MvcResult msgResult = mockMvc.perform(MockMvcRequestBuilders.post("/sessions/" + sessionId + "/messages")
-                .params(msgParams)
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(msgRequest))
                 .header(API_KEY_HEADER, API_KEY_VALUE)
                 .header("X-Forwarded-For", clientIp))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
         String msgJson = msgResult.getResponse().getContentAsString();
-        Assertions.assertTrue(msgJson.contains("id"));
+        JsonNode msgNode = objectMapper.readTree(msgJson);
+        Assertions.assertTrue(msgNode.has("id"));
+        Assertions.assertEquals("user", msgNode.get("sender").asText());
+        Assertions.assertEquals("Hello, world!", msgNode.get("content").asText());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/sessions/" + sessionId + "/messages")
                 .param("page", "0")

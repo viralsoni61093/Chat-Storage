@@ -4,6 +4,10 @@ import org.example.model.ChatMessage;
 import org.example.model.ChatSession;
 import org.example.service.ChatMessageService;
 import org.example.service.ChatSessionService;
+import org.example.dto.ChatMessageRequest;
+import org.example.dto.ChatMessageResponse;
+import org.example.mapper.ChatMessageMapper;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -26,19 +30,28 @@ public class ChatMessageController {
      */
     @Autowired
     private ChatMessageService chatMessageService;
+    /**
+     * Mapper for converting between ChatMessage entities and ChatMessage DTOs.
+     */
+    @Autowired
+    private ChatMessageMapper chatMessageMapper;
 
     /**
      * Adds a new message to the specified chat session.
      * @param sessionId the ID of the chat session
-     * @param sender the sender of the message
-     * @param content the message content
-     * @param context optional context for the message
+     * @param request the chat message request body
      * @return the created ChatMessage
      */
     @PostMapping
-    public ResponseEntity<ChatMessage> addMessage(@PathVariable Long sessionId, @RequestParam String sender, @RequestParam String content, @RequestParam(required = false) String context) {
+    public ResponseEntity<ChatMessageResponse> addMessage(
+        @PathVariable Long sessionId,
+        @Valid @RequestBody ChatMessageRequest request
+    ) {
         ChatSession session = chatSessionService.getSession(sessionId).orElseThrow();
-        return ResponseEntity.ok(chatMessageService.addMessage(session, sender, content, context));
+        request.setSession(session);
+        ChatMessage savedMessage = chatMessageService.addMessage(request);
+        ChatMessageResponse response = chatMessageMapper.toDto(savedMessage);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -49,8 +62,10 @@ public class ChatMessageController {
      * @return a page of ChatMessage objects
      */
     @GetMapping
-    public ResponseEntity<Page<ChatMessage>> getMessages(@PathVariable Long sessionId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    public ResponseEntity<Page<ChatMessageResponse>> getMessages(@PathVariable Long sessionId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         ChatSession session = chatSessionService.getSession(sessionId).orElseThrow();
-        return ResponseEntity.ok(chatMessageService.getMessages(session, page, size));
+        Page<ChatMessage> messages = chatMessageService.getMessages(session, page, size);
+        Page<ChatMessageResponse> responses = messages.map(chatMessageMapper::toDto);
+        return ResponseEntity.ok(responses);
     }
 }
