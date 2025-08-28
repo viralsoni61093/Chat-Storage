@@ -1,0 +1,162 @@
+{
+  "info": {
+    "_postman_id": "chat-storage-collection-001",
+    "name": "Chat Storage API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for testing Chat Storage microservice APIs."
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Create Chat Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions?userId={{userId}}&name={{name}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions"],
+          "query": [
+            { "key": "userId", "value": "{{userId}}" },
+            { "key": "name", "value": "{{name}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Chat Sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions?userId={{userId}}&favorite={{favorite}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions"],
+          "query": [
+            { "key": "userId", "value": "{{userId}}" },
+            { "key": "favorite", "value": "{{favorite}}", "disabled": true }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rename Chat Session",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions/{{id}}/rename?name={{name}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions", "{{id}}", "rename"],
+          "query": [
+            { "key": "name", "value": "{{name}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Set Session Favorite",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions/{{id}}/favorite?favorite={{favorite}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions", "{{id}}", "favorite"],
+          "query": [
+            { "key": "favorite", "value": "{{favorite}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Chat Session",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions/{{id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions", "{{id}}"]
+        }
+      }
+    },
+    {
+      "name": "Add Chat Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions/{{sessionId}}/messages?sender={{sender}}&content={{content}}&context={{context}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions", "{{sessionId}}", "messages"],
+          "query": [
+            { "key": "sender", "value": "{{sender}}" },
+            { "key": "content", "value": "{{content}}" },
+            { "key": "context", "value": "{{context}}", "disabled": true }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Chat Messages",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "API_KEY", "value": "your-secure-api-key", "type": "text" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/sessions/{{sessionId}}/messages?page={{page}}&size={{size}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["sessions", "{{sessionId}}", "messages"],
+          "query": [
+            { "key": "page", "value": "{{page}}", "disabled": true },
+            { "key": "size", "value": "{{size}}", "disabled": true }
+          ]
+        }
+      }
+    }
+  ]
+}
+
