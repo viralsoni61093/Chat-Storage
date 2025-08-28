@@ -27,7 +27,7 @@ A production-ready backend microservice for storing and managing chat histories 
    docker-compose up --build
    ```
 3. The API will be available at `http://localhost:8080`.
-4. Swagger UI: `http://localhost:8080/swagger-ui.html`
+4. Swagger UI: `http://localhost:8081/swagger-ui/index.html`
 5. pgAdmin: `http://localhost:5050` (login: admin@admin.com / admin)
 
 ### Environment Variables
@@ -52,12 +52,4 @@ All endpoints (except `/health` and Swagger docs) require an `X-API-KEY` header 
 
 See Swagger UI for full request/response details.
 
-### Running Tests
-To run unit tests:
-```sh
-./mvnw test
-```
-
-## License
-MIT
 
